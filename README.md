@@ -1,119 +1,58 @@
-<div align="center">
+# API 接口文档
 
-**中文简体** | [English](./docs/en/README_EN.md) | [Português (Brasil)](./docs/pt/README_pt-BR.md)
+### 接口地址
+```
+http://127.0.0.1:9977/api
+```
 
-</div>
+### 请求方法
+`POST`
 
----
+### 请求参数
 
-<div align="center">
+| 参数            | 描述                          | 可选值                                                                                  |
+|-----------------|-------------------------------|-----------------------------------------------------------------------------------------|
+| `language`      | 语言代码                       | `zh`（中文）, `en`（英语）, `fr`（法语）, `de`（德语）, `ja`（日语）, `ko`（韩语）<br>`ru`（俄语）, `es`（西班牙语）, `th`（泰语）, `it`（意大利语）<br>`pt`（葡萄牙语）, `vi`（越南语）, `ar`（阿拉伯语）, `tr`（土耳其语）|
+| `model`         | 模型名称                       | `base`, `small`, `medium`, `large-v3`                                                     |
+| `response_format` | 返回的字幕格式                 | `text`, `json`, `srt`                                                                    |
+| `file`          | 音视频文件（二进制上传）        | 音视频文件（二进制数据）                                                                 |
 
-[👑 捐助本项目](https://github.com/jianchang512/pyvideotrans/blob/main/docs/about.md) | [Discord邀请](https://discord.gg/SyT6GEwkJS)
+### 示例
 
-</div>
+#### 请求示例：
+```json
+{
+  "language": "zh",
+  "model": "small",
+  "response_format": "json",
+  "file": "audio_file_binary_data"
+}
+```
 
----
+```python
+import requests
 
+url = "http://127.0.0.1:9977/api"
+files = {'file': open('/path/to/your/audio/file', 'rb')}
+data = {
+    'language': 'zh',
+    'model': 'small',
+    'response_format': 'json'
+}
+response = requests.post(url, files=files, data=data)
 
-# 语音识别转文字工具
+print(response.json())  # 打印返回的JSON结果
 
-这是一个离线运行的本地语音识别转文字工具，基于 fast-whipser 开源模型，可将视频/音频中的人类声音识别并转为文字，可输出json格式、srt字幕带时间戳格式、纯文字格式。可用于自行部署后替代 openai 的语音识别接口或百度语音识别等，准确率基本等同openai官方api接口。
+```
+```curl
+curl -X POST http://127.0.0.1:9977/api \
+  -H "Content-Type: multipart/form-data" \
+  -F "language=zh" \
+  -F "model=small" \
+  -F "response_format=json" \
+  -F "file=@/path/to/your/audio/file"
+```
 
-
-fast-whisper 开源模型有 tiny/base/small/medium/large-v3, 内置 tiny 模型，tiny->large-v3识别效果越来越好，但所需计算机资源也更多，根据需要可自行下载后解压到 models 目录下即可。
-
-> **[赞助商]**
-> 
-> [![](https://github.com/user-attachments/assets/5348c86e-2d5f-44c7-bc1b-3cc5f077e710)](https://gpt302.saaslink.net/teRK8Y)
->  [302.AI](https://gpt302.saaslink.net/teRK8Y)是一个按需付费的一站式AI应用平台，开放平台，开源生态, [302.AI开源地址](https://github.com/302ai)
-> 
-> 集合了最新最全的AI模型和品牌/按需付费零月费/管理和使用分离/所有AI能力均提供API/每周推出2-3个新应用
-
-
-
-# 视频演示
-
-
-https://github.com/jianchang512/stt/assets/3378335/d716acb6-c20c-4174-9620-f574a7ff095d
-
-
-![image](https://github.com/jianchang512/stt/assets/3378335/0f724ff1-21b3-4960-b6ba-5aa994ea414c)
-
-
-
-
-# 预编译Win版使用方法/Linux和Mac源码部署
-
-1. [点击此处打开Releases页面下载](https://github.com/jianchang512/stt/releases)预编译文件
-
-2. 下载后解压到某处，比如 E:/stt
-
-3. 双击 start.exe ，等待自动打开浏览器窗口即可
-
-4. 点击页面中的上传区域，在弹窗中找到想识别的音频或视频文件，或直接拖拽音频视频文件到上传区域，然后选择发生语言、文本输出格式、所用模型，点击“立即开始识别”，稍等片刻，底部文本框中会以所选格式显示识别结果
-
-5. 如果机器拥有英伟达GPU，并正确配置了CUDA环境，将自动使用CUDA加速
-
-
-# 源码部署(Linux/Mac/Window)
-
-0. 要求 python 3.9->3.11
-
-1. 创建空目录，比如 E:/stt, 在这个目录下打开 cmd 窗口，方法是地址栏中输入 `cmd`, 然后回车。
-
-	使用git拉取源码到当前目录 ` git clone git@github.com:jianchang512/stt.git . `
-
-2. 创建虚拟环境 `python -m venv venv`
-
-3. 激活环境，win下命令 `%cd%/venv/scripts/activate`，linux和Mac下命令 `source ./venv/bin/activate`
-
-4. 安装依赖: `pip install -r requirements.txt`,如果报版本冲突错误，请执行 `pip install -r requirements.txt --no-deps` ,如果希望支持cuda加速，继续执行代码 `pip uninstall -y torch`, `pip install torch --index-url https://download.pytorch.org/whl/cu121`
-
-5. win下解压 ffmpeg.7z，将其中的`ffmpeg.exe`和`ffprobe.exe`放在项目目录下, linux和mac 自行搜索 如何安装ffmpeg
-
-6. [下载模型压缩包](https://github.com/jianchang512/stt/releases/tag/0.0)，根据需要下载模型，下载后将压缩包里的文件夹放到项目根目录的 models 文件夹内
-
-7. 执行  `python  start.py `，等待自动打开本地浏览器窗口。
-
-
-# Api接口
-
-接口地址: http://127.0.0.1:9977/api
-
-请求方法: POST
-
-请求参数:
-
-    language: 语言代码:可选如下
-
-    >
-    > 中文：zh
-    > 英语：en
-    > 法语：fr
-    > 德语：de
-    > 日语：ja
-    > 韩语：ko
-    > 俄语：ru
-    > 西班牙语：es
-    > 泰国语：th
-    > 意大利语：it
-    > 葡萄牙语：pt
-    > 越南语：vi
-    > 阿拉伯语：ar
-    > 土耳其语：tr
-    >
-
-    model: 模型名称，可选如下
-    >
-    > base 对应于 models/models--Systran--faster-whisper-base
-    > small 对应于 models/models--Systran--faster-whisper-small
-    > medium 对应于 models/models--Systran--faster-whisper-medium
-    > large-v3 对应于 models/models--Systran--faster-whisper-large-v3
-    >
-
-    response_format: 返回的字幕格式，可选 text|json|srt
-
-    file: 音视频文件，二进制上传
 
 Api 请求示例
 
@@ -129,6 +68,75 @@ Api 请求示例
     print(response.json())
 ```
 
+
+
+# 支持的 返回格式示例！
+1. **JSON**
+2. **TEXT**
+3. **SRT**
+
+### 示例内容
+
+#### 1. JSON 格式
+JSON 格式的响应包含一个列表，每个元素是一个字典，包含 `start_time`、`end_time` 和 `text` 字段。
+
+**示例：**
+```json
+[
+    {
+        "end_time": "00:00:25,200",
+        "line": 1,
+        "start_time": "00:00:00,000",
+        "text": "从选学的角度来讲,当有一些事上天不让你做成,其实是在保护你,比如车坏了,蓝点了或者你的错过了,这时候我们别生气别抱怨,事件呢,都是有规律,该来的会来,该走的,我们也留不住,有时候得到了规定是好事,失去也不一定是坏事,人间自有英国,残事,机有因素。"
+    }
+]
+```
+
+#### 2. TEXT 格式
+TEXT 格式的响应是一个简单的字符串，包含了所有字幕文本。
+
+**示例：**
+```
+从选学的角度来讲,当有一些事上天不让你做成,其实是在保护你,比如车坏了,蓝点了或者你的错过了,这时候我们别生气别抱怨,事件呢,都是有规律,该来的会来,该走的,我们也留不住,有时候得到了规定是好事,失去也不一定是坏事,人间自有英国,残事,机有因素。
+```
+
+#### 3. SRT 格式
+SRT 格式的响应是一个符合SRT标准的字幕文件内容。
+
+**示例：**
+```
+1
+00:00:00,000 --> 00:00:25,200
+从选学的角度来讲,当有一些事上天不让你做成,其实是在保护你,比如车坏了,蓝点了或者你的错过了,这时候我们别生气别抱怨,事件呢, 都是有规律,该来的会来,该走的,我们也留不住,有时候得到了规定是好事,失去也不一定是坏事,人间自有英国,残事,机有因素。
+```
+
+
+
+假设我们有一个音频文件 `audio.wav`，并且选择了不同的 `response_format`，下面是每种格式的具体输出示例：
+
+#### JSON 格式
+```json
+[
+    {
+        "end_time": "00:00:25,200",
+        "line": 1,
+        "start_time": "00:00:00,000",
+        "text": "从选学的角度来讲,当有一些事上天不让你做成,其实是在保护你,比如车坏了,蓝点了或者你的错过了,这时候我们别生气别抱怨,事件呢,都是有规律,该来的会来,该走的,我们也留不住,有时候得到了规定是好事,失去也不一定是坏事,人间自有英国,残事,机有因素。"
+    }
+]
+```
+
+#### TEXT 格式
+```
+从选学的角度来讲,当有一些事上天不让你做成,其实是在保护你,比如车坏了,蓝点了或者你的错过了,这时候我们别生气别抱怨,事件呢,都是有规律,该来的会来,该走的,我们也留不住,有时候得到了规定是好事,失去也不一定是坏事,人间自有英国,残事,机有因素。
+```
+
+#### SRT 格式
+```
+1
+00:00:00,000 --> 00:00:25,200
+从选学的角度来讲,当有一些事上天不让你做成,其实是在保护你,比如车坏了,蓝点了或者你的错过了,这时候我们别生气别抱怨,事件呢, 都是有规律,该来的会来,该走的,我们也留不住,有时候得到了规定是好事,失去也不一定是坏事,人间自有英国,残事,机有因素。
+```
 
 
 # CUDA 加速支持
